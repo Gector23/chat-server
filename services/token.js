@@ -5,12 +5,12 @@ const Token = require("../models/token.js");
 exports.generateTokens = payload => {
   const acssessToken = jwt.sign(
     payload,
-    "ACCESS_SECRET",
+    process.env.ACCESS_SECRET_KEY,
     { expiresIn: "15m" }
   );
   const refreshToken = jwt.sign(
     payload,
-    "REFRESH_SECRET",
+    process.env.REFRESH_SECRET_KEY,
     { expiresIn: "7d" }
   );
   return {
@@ -19,13 +19,9 @@ exports.generateTokens = payload => {
   };
 };
 
-exports.verifyToken = (token, tokenType) => {
+exports.verifyToken = (token, secret) => {
   try {
-    if (tokenType = "access") {
-      return jwt.verify(token, "ACCESS_SECRET");
-    } else if (tokenType = "refresh") {
-      return jwt.verify(token, "REFRESH_SECRET");
-    }
+    return jwt.verify(token, secret);
   } catch (err) {
     return null;
   }
