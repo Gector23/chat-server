@@ -22,27 +22,17 @@ exports.login = async (req, res, next) => {
         throw new Error("Incorrect password");
       }
     }
-    const tokens = tokenServise.generateTokens({
+    const token = tokenServise.generateToken({
       login: user.login,
       isAdmin: user.isAdmin
     });
-    await tokenServise.saveRefreshToken(user._id, tokens.refreshToken);
-    res.cookie("refreshToken", tokens.refreshToken, {
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      httpOnly: true
-    });
     return res.status(200).json({
       message: "Successful login",
-      accessToken: tokens.acssessToken,
-      user: {
-        _id: user._id,
-        login: user.login,
-        isAdmin: user.isAdmin,
-        isMuted: user.isMuted,
-        isBlocked: user.isBlocked
-      }
+      token
     });
   } catch (err) {
     next(err);
   }
 };
+
+exports.getUser

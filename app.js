@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
-const authRouter = require("./routes/auth");
+const userRouter = require("./routes/user");
 
 const checkError = require("./middleware/checkError");
 
@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 app.use(cors({
   origin: "*"
 }));
-app.use("/api/auth", authRouter);
+app.use("/api/auth", userRouter);
 app.use(checkError);
 
 module.exports = app;
