@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const { validationResult } = require("express-validator");
 
 const User = require("../models/user.js");
 
@@ -6,6 +7,10 @@ const tokenServise = require("../services/token");
 
 exports.login = async (req, res, next) => {
   try {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      throw new Error(validation.errors[0].msg);
+    }
     const { login, password } = req.body;
     let user = await User.findOne({ login });
     if (!user) {

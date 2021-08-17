@@ -1,6 +1,11 @@
 module.exports = (err, req, res, next) => {
   console.log(err);
   switch(err.message) {
+    case "Incorrect login":
+      res.status(400).json({
+        message: err.message
+      });
+      break;
     case "Incorrect password":
       res.status(400).json({
         message: err.message

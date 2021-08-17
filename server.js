@@ -79,12 +79,16 @@ io.on("connection", async socket => {
     adminHandlers(io, socket);
   }
 
+  const prevSocket = onlineUsers.getUser(socket.data.tokenPayload.login);
+  if (prevSocket) {
+    prevSocket.disconnect();
+  }
   onlineUsers.addUser(socket.data.tokenPayload.login, socket);
   socket.emit("c:userRestrictions", socket.data.restrictions);
   if (socket.data.restrictions.isAdmin) {
     socket.join("admin");
   }
-  io.emit("c:message", {
+  socket.broadcast.emit("c:message", {
     text: `${socket.data.tokenPayload.login} join to chat`,
     type: "info"
   });
@@ -99,7 +103,7 @@ io.on("connection", async socket => {
       socket.leave("admin");
     }
     socket.disconnect();
-    io.emit("c:message", {
+    socket.broadcast.emit("c:message", {
       text: `${socket.data.tokenPayload.login} left the chat`,
       type: "info"
     });
