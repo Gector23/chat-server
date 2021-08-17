@@ -3,14 +3,20 @@ const userService = require("../services/user");
 module.exports = (io, socket) => {
   socket.on("s:message", async text => {
     if (socket.data.restrictions.isMuted) {
-      socket.emit("c:info", "You are muted!");
+      socket.emit("c:message", {
+        text: "You are muted!",
+        type: "info"
+      });
       return;
     }
 
     const messageDate = Date.now();
 
     if (messageDate < +socket.data.restrictions.lastMessageDate + 1000 * 15) {
-      socket.emit("c:info", "Interval between messages 15s");
+      socket.emit("c:message", {
+        text: "Interval between messages 15s",
+        type: "info"
+      });
       return;
     }
 
@@ -20,7 +26,9 @@ module.exports = (io, socket) => {
     io.emit("c:message", {
       login: socket.data.tokenPayload.login,
       text,
-      date: messageDate
+      date: messageDate,
+      type: "message",
+      textColor: socket.data.textColor
     });
   });
 };

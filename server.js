@@ -56,6 +56,23 @@ io.use(async (socket, next) => {
   next();
 });
 
+io.use(async (socket, next) => {
+  const randomInteger = (min, max) => {
+    let rand = min + Math.random() * (max + 1 - min);
+    return Math.floor(rand);
+  }
+
+  const colors = ["primary", "secondary", "error", "warning", "info", "success"];
+  const shades = ["light", "main", "dark"];
+
+  socket.data.textColor = {
+    color: colors[randomInteger(0, 5)],
+    shade: shades[randomInteger(0, 2)]
+  };
+
+  next();
+});
+
 io.on("connection", async socket => {
   messageHandlers(io, socket);
   if (socket.data.restrictions.isAdmin) {
@@ -67,19 +84,25 @@ io.on("connection", async socket => {
   if (socket.data.restrictions.isAdmin) {
     socket.join("admin");
   }
-  io.emit("c:info", `${socket.data.tokenPayload.login} join to chat`);
+  io.emit("c:message", {
+    text: `${socket.data.tokenPayload.login} join to chat`,
+    type: "info"
+  });
   io.emit("c:onlineUsers", onlineUsers.getOnlineUsers());
   io.in("admin").emit("c:allUsers", await userService.getAllUsers());
 
   console.log("Connected");
 
   socket.on("disconnect", async () => {
-    onlineUsers.removeUsers(socket.data.tokenPayload.login);
+    onlineUsers.removeUser(socket.data.tokenPayload.login);
     if (socket.data.restrictions.isAdmin) {
       socket.leave("admin");
     }
     socket.disconnect();
-    io.emit("c:info", `${socket.data.tokenPayload.login} left the chat`);
+    io.emit("c:message", {
+      text: `${socket.data.tokenPayload.login} left the chat`,
+      type: "info"
+    });
     io.emit("c:onlineUsers", onlineUsers.getOnlineUsers());
 
     console.log("Disconnected");

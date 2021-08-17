@@ -13,9 +13,12 @@ exports.removeUser = login => {
 };
 
 exports.getOnlineUsers = () => {
-  const tokensData = [];
+  const users = [];
   for (socket of onlineUsers.values()) {
-    tokensData.push(socket.data.tokenPayload);
+    users.push({
+      login: socket.data.tokenPayload.login,
+      textColor: socket.data.textColor
+    });
   }
-  return tokensData;
+  return users;
 };

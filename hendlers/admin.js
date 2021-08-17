@@ -9,7 +9,10 @@ module.exports = (io, socket) => {
     userSocket.data.restrictions.isMuted = true;
     if (userSocket) {
       userSocket.emit("c:userRestrictions", userSocket.data.restrictions);
-      userSocket.emit("c:info", "You are muted!");
+      userSocket.emit("c:message", {
+        text: "You are muted!",
+        type: "info"
+      });
     }
     io.in("admin").emit("c:allUsers", await userService.getAllUsers());
   });
@@ -20,7 +23,10 @@ module.exports = (io, socket) => {
     userSocket.data.restrictions.isMuted = false;
     if (userSocket) {
       userSocket.emit("c:userRestrictions", userSocket.data.restrictions);
-      userSocket.emit("c:info", "You are unmuted!");
+      userSocket.emit("c:message", {
+        text: "You are unmuted!",
+        type: "info"
+      });
     }
     io.in("admin").emit("c:allUsers", await userService.getAllUsers());
   });
