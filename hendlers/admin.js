@@ -2,10 +2,9 @@ const userService = require("../services/user");
 const onlineUsers = require("../services/onlineUsers");
 
 module.exports = (io, socket) => {
-  socket.on("s:muteUser", async userLogin => {
-
-    await userService.updateUser(userLogin, { isMuted: true });
-    const userSocket = onlineUsers.getUser(userLogin);
+  socket.on("s:muteUser", async userId => {
+    await userService.updateUser(userId, { isMuted: true });
+    const userSocket = onlineUsers.getUser(userId);
     userSocket.data.restrictions.isMuted = true;
     if (userSocket) {
       userSocket.emit("c:userRestrictions", userSocket.data.restrictions);
@@ -17,9 +16,9 @@ module.exports = (io, socket) => {
     io.in("admin").emit("c:allUsers", await userService.getAllUsers());
   });
 
-  socket.on("s:unmuteUser", async userLogin => {
-    await userService.updateUser(userLogin, { isMuted: false });
-    const userSocket = onlineUsers.getUser(userLogin);
+  socket.on("s:unmuteUser", async userId => {
+    await userService.updateUser(userId, { isMuted: false });
+    const userSocket = onlineUsers.getUser(userId);
     userSocket.data.restrictions.isMuted = false;
     if (userSocket) {
       userSocket.emit("c:userRestrictions", userSocket.data.restrictions);
@@ -31,19 +30,19 @@ module.exports = (io, socket) => {
     io.in("admin").emit("c:allUsers", await userService.getAllUsers());
   });
 
-  socket.on("s:blockUser", async userLogin => {
-    await userService.updateUser(userLogin, { isBlocked: true });
-    const userSocket = onlineUsers.getUser(userLogin);
+  socket.on("s:blockUser", async userId => {
+    await userService.updateUser(userId, { isBlocked: true });
+    const userSocket = onlineUsers.getUser(userId);
     if (userSocket) {
       userSocket.disconnect();
-      onlineUsers.removeUser(userLogin);
+      onlineUsers.removeUser(userId);
       io.emit("c:onlineUsers", onlineUsers.getOnlineUsers());
     }
     io.in("admin").emit("c:allUsers", await userService.getAllUsers());
   });
 
-  socket.on("s:unblockUser", async userLogin => {
-    await userService.updateUser(userLogin, { isBlocked: false });
+  socket.on("s:unblockUser", async userId => {
+    await userService.updateUser(userId, { isBlocked: false });
     io.in("admin").emit("c:allUsers", await userService.getAllUsers());
   });
 };

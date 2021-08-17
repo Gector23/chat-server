@@ -20,11 +20,11 @@ module.exports = (io, socket) => {
       return;
     }
 
-    userService.updateUser(socket.data.tokenPayload.login, { lastMessageDate: messageDate })
+    userService.updateUser(socket.data.tokenPayload._id, { lastMessageDate: messageDate })
     socket.data.restrictions.lastMessageDate = messageDate;
 
     io.emit("c:message", {
-      login: socket.data.tokenPayload.login,
+      author: socket.data.tokenPayload.login,
       text,
       date: messageDate,
       type: "message",

@@ -1,13 +1,13 @@
 const User = require("../models/user");
 
-exports.getUserRestrictions = async login => {
-  return User.findOne({ login }, "isAdmin isMuted isBlocked lastMessageDate");
+exports.getUserRestrictions = async _id => {
+  return User.findById(_id, "isAdmin isMuted isBlocked lastMessageDate");
 };
 
 exports.getAllUsers = async () => {
   return User.find({}, "login isAdmin isMuted isBlocked");
 };
 
-exports.updateUser = async (login, update) => {
-  return User.updateOne({ login }, update);
+exports.updateUser = async (_id, update) => {
+  return User.findByIdAndUpdate(_id, update);
 }

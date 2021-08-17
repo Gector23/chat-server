@@ -28,8 +28,8 @@ exports.login = async (req, res, next) => {
       }
     }
     const token = tokenServise.generateToken({
-      login: user.login,
-      isAdmin: user.isAdmin
+      _id: user._id,
+      login: user.login
     });
     return res.status(200).json({
       message: "Successful login",

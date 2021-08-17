@@ -47,7 +47,7 @@ io.use((socket, next) => {
 });
 
 io.use(async (socket, next) => {
-  const userRestrictions = await userService.getUserRestrictions(socket.data.tokenPayload.login);
+  const userRestrictions = await userService.getUserRestrictions(socket.data.tokenPayload._id);
   if (userRestrictions.isBlocked) {
     socket.disconnect();
     return;
@@ -69,7 +69,6 @@ io.use(async (socket, next) => {
     color: colors[randomInteger(0, 5)],
     shade: shades[randomInteger(0, 2)]
   };
-
   next();
 });
 
@@ -83,7 +82,7 @@ io.on("connection", async socket => {
   if (prevSocket) {
     prevSocket.disconnect();
   }
-  onlineUsers.addUser(socket.data.tokenPayload.login, socket);
+  onlineUsers.addUser(socket.data.tokenPayload._id, socket);
   socket.emit("c:userRestrictions", socket.data.restrictions);
   if (socket.data.restrictions.isAdmin) {
     socket.join("admin");
@@ -95,10 +94,10 @@ io.on("connection", async socket => {
   io.emit("c:onlineUsers", onlineUsers.getOnlineUsers());
   io.in("admin").emit("c:allUsers", await userService.getAllUsers());
 
-  console.log("Connected");
+  console.log(`${socket.data.tokenPayload.login} connected`);
 
   socket.on("disconnect", async () => {
-    onlineUsers.removeUser(socket.data.tokenPayload.login);
+    onlineUsers.removeUser(socket.data.tokenPayload._id);
     if (socket.data.restrictions.isAdmin) {
       socket.leave("admin");
     }
@@ -109,7 +108,7 @@ io.on("connection", async socket => {
     });
     io.emit("c:onlineUsers", onlineUsers.getOnlineUsers());
 
-    console.log("Disconnected");
+    console.log(`${socket.data.tokenPayload.login} disconnected`);
   });
 });
 
