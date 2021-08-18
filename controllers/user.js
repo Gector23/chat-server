@@ -3,7 +3,8 @@ const { validationResult } = require("express-validator");
 
 const User = require("../models/user.js");
 
-const tokenServise = require("../services/token");
+const tokenService = require("../services/token");
+const colorService = require("../services/color");
 
 exports.login = async (req, res, next) => {
   try {
@@ -19,7 +20,8 @@ exports.login = async (req, res, next) => {
       user = await User.create({
         login,
         password: hashPassword,
-        isAdmin
+        isAdmin,
+        color: colorService.getColor()
       });
     } else {
       const isPassEqual = await bcrypt.compare(password, user.password);
@@ -27,9 +29,8 @@ exports.login = async (req, res, next) => {
         throw new Error("Incorrect password");
       }
     }
-    const token = tokenServise.generateToken({
-      _id: user._id,
-      login: user.login
+    const token = tokenService.generateToken({
+      _id: user._id
     });
     return res.status(200).json({
       message: "Successful login",

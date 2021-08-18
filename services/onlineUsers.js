@@ -16,8 +16,8 @@ exports.getOnlineUsers = () => {
   const users = [];
   for (socket of onlineUsers.values()) {
     users.push({
-      login: socket.data.tokenPayload.login,
-      textColor: socket.data.textColor
+      login: socket.data.userData.login,
+      color: socket.data.userData.color
     });
   }
   return users;

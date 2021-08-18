@@ -6,7 +6,7 @@ const { Server } = require("socket.io");
 const app = require("./app");
 
 const userService = require("./services/user");
-const onlineUsers = require("./services/onlineUsers");
+const onlineUsersService = require("./services/onlineUsers");
 const tokenService = require("./services/token");
 
 const messageHandlers = require("./hendlers/message");
@@ -48,68 +48,53 @@ io.use((socket, next) => {
 });
 
 io.use(async (socket, next) => {
-  const userRestrictions = await userService.getUserRestrictions(socket.data.tokenPayload._id);
-  if (userRestrictions.isBlocked) {
+  const userData = await userService.getUserData(socket.data.tokenPayload._id);
+  if (userData.restrictions.isBlocked) {
     socket.disconnect();
     return;
   }
-  socket.data.restrictions = userRestrictions;
-  next();
-});
-
-io.use(async (socket, next) => {
-  const randomInteger = (min, max) => {
-    let rand = min + Math.random() * (max + 1 - min);
-    return Math.floor(rand);
-  }
-
-  const colors = ["primary", "secondary", "error", "warning", "info", "success"];
-  const shades = ["light", "main", "dark"];
-
-  socket.data.textColor = {
-    color: colors[randomInteger(0, 5)],
-    shade: shades[randomInteger(0, 2)]
-  };
+  socket.data.userData = userData;
   next();
 });
 
 io.on("connection", async socket => {
   messageHandlers(io, socket);
-  if (socket.data.restrictions.isAdmin) {
+  if (socket.data.userData.restrictions.isAdmin) {
     adminHandlers(io, socket);
   }
 
-  const prevSocket = onlineUsers.getUser(socket.data.tokenPayload.login);
+  const prevSocket = onlineUsersService.getUser(socket.data.tokenPayload._id);
   if (prevSocket) {
     prevSocket.disconnect();
   }
-  onlineUsers.addUser(socket.data.tokenPayload._id, socket);
-  socket.emit("c:userRestrictions", socket.data.restrictions);
-  if (socket.data.restrictions.isAdmin) {
+
+  onlineUsersService.addUser(socket.data.tokenPayload._id, socket);
+  socket.emit("c:userRestrictions", socket.data.userData.restrictions);
+  if (socket.data.userData.restrictions.isAdmin) {
     socket.join("admin");
   }
   socket.broadcast.emit("c:message", {
-    text: `${socket.data.tokenPayload.login} join to chat`,
+    text: `${socket.data.userData.login} join to chat`,
     type: "info"
   });
-  io.emit("c:onlineUsers", onlineUsers.getOnlineUsers());
+  io.emit("c:onlineUsers", onlineUsersService.getOnlineUsers());
   io.in("admin").emit("c:allUsers", await userService.getAllUsers());
 
-  console.log(`${socket.data.tokenPayload.login} connected`);
+  console.log(`${socket.data.userData.login} connected`);
 
   socket.on("disconnect", async () => {
-    onlineUsers.removeUser(socket.data.tokenPayload._id);
-    if (socket.data.restrictions.isAdmin) {
+    onlineUsersService.removeUser(socket.data.tokenPayload._id);
+    if (socket.data.userData.restrictions.isAdmin) {
       socket.leave("admin");
     }
     socket.disconnect();
     socket.broadcast.emit("c:message", {
-      text: `${socket.data.tokenPayload.login} left the chat`,
+      text: `${socket.data.userData.login} left the chat`,
       type: "info"
     });
-    io.emit("c:onlineUsers", onlineUsers.getOnlineUsers());
+    io.emit("c:onlineUsers", onlineUsersService.getOnlineUsers());
 
-    console.log(`${socket.data.tokenPayload.login} disconnected`);
+    console.log(`${socket.data.userData.login} disconnected`);
   });
 });
 

@@ -6,6 +6,7 @@ const userSchema = mongoose.Schema({
   isAdmin: {type: Boolean, default: false},
   isMuted: {type: Boolean, default: false},
   isBlocked: {type: Boolean, default: false},
+  color: {type: String, require: true},
   lastMessageDate: {type: Date, default: null}
 });
 

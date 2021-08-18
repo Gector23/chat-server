@@ -1,13 +1,13 @@
 const userService = require("../services/user");
-const onlineUsers = require("../services/onlineUsers");
+const onlineUsersService = require("../services/onlineUsers");
 
 module.exports = (io, socket) => {
   socket.on("s:muteUser", async userId => {
     await userService.updateUser(userId, { isMuted: true });
-    const userSocket = onlineUsers.getUser(userId);
+    const userSocket = onlineUsersService.getUser(userId);
     if (userSocket) {
-      userSocket.data.restrictions.isMuted = true;
-      userSocket.emit("c:userRestrictions", userSocket.data.restrictions);
+      userSocket.data.userData.restrictions.isMuted = true;
+      userSocket.emit("c:userRestrictions", userSocket.data.userData.restrictions);
       userSocket.emit("c:message", {
         text: "You are muted!",
         type: "info"
@@ -18,10 +18,10 @@ module.exports = (io, socket) => {
 
   socket.on("s:unmuteUser", async userId => {
     await userService.updateUser(userId, { isMuted: false });
-    const userSocket = onlineUsers.getUser(userId);
+    const userSocket = onlineUsersService.getUser(userId);
     if (userSocket) {
-      userSocket.data.restrictions.isMuted = false;
-      userSocket.emit("c:userRestrictions", userSocket.data.restrictions);
+      userSocket.data.userData.restrictions.isMuted = false;
+      userSocket.emit("c:userRestrictions", userSocket.data.userData.restrictions);
       userSocket.emit("c:message", {
         text: "You are unmuted!",
         type: "info"
@@ -32,11 +32,11 @@ module.exports = (io, socket) => {
 
   socket.on("s:blockUser", async userId => {
     await userService.updateUser(userId, { isBlocked: true });
-    const userSocket = onlineUsers.getUser(userId);
+    const userSocket = onlineUsersService.getUser(userId);
     if (userSocket) {
       userSocket.disconnect();
-      onlineUsers.removeUser(userId);
-      io.emit("c:onlineUsers", onlineUsers.getOnlineUsers());
+      onlineUsersService.removeUser(userId);
+      io.emit("c:onlineUsers", onlineUsersService.getOnlineUsers());
     }
     io.in("admin").emit("c:allUsers", await userService.getAllUsers());
   });

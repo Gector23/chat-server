@@ -2,7 +2,7 @@ const userService = require("../services/user");
 
 module.exports = (io, socket) => {
   socket.on("s:message", async text => {
-    if (socket.data.restrictions.isMuted) {
+    if (socket.data.userData.restrictions.isMuted) {
       socket.emit("c:message", {
         text: "You are muted!",
         type: "info"
@@ -20,7 +20,7 @@ module.exports = (io, socket) => {
 
     const messageDate = Date.now();
 
-    if (messageDate < +socket.data.restrictions.lastMessageDate + 1000 * 15) {
+    if (messageDate < +socket.data.userData.lastMessageDate + 1000 * 15) {
       socket.emit("c:message", {
         text: "Interval between messages 15s",
         type: "info"
@@ -29,14 +29,14 @@ module.exports = (io, socket) => {
     }
 
     userService.updateUser(socket.data.tokenPayload._id, { lastMessageDate: messageDate })
-    socket.data.restrictions.lastMessageDate = messageDate;
+    socket.data.userData.lastMessageDate = messageDate;
 
     io.emit("c:message", {
-      author: socket.data.tokenPayload.login,
+      author: socket.data.userData.login,
       text,
       date: messageDate,
       type: "message",
-      textColor: socket.data.textColor
+      color: socket.data.userData.color
     });
   });
 };
