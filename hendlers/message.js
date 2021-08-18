@@ -10,6 +10,14 @@ module.exports = (io, socket) => {
       return;
     }
 
+    if (text.length > 200) {
+      socket.emit("c:message", {
+        text: "Message max length is 200",
+        type: "info"
+      });
+      return;
+    }
+
     const messageDate = Date.now();
 
     if (messageDate < +socket.data.restrictions.lastMessageDate + 1000 * 15) {

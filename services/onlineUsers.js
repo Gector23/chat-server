@@ -1,15 +1,15 @@
 const onlineUsers = new Map();
 
-exports.addUser = (login, socket) => {
-  return onlineUsers.set(login, socket);
+exports.addUser = (userId, socket) => {
+  return onlineUsers.set(userId, socket);
 };
 
-exports.getUser = login => {
-  return onlineUsers.get(login);
+exports.getUser = userId => {
+  return onlineUsers.get(userId);
 };
 
-exports.removeUser = login => {
-  return onlineUsers.delete(login);
+exports.removeUser = userId => {
+  return onlineUsers.delete(userId);
 };
 
 exports.getOnlineUsers = () => {

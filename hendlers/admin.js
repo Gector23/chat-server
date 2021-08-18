@@ -5,8 +5,8 @@ module.exports = (io, socket) => {
   socket.on("s:muteUser", async userId => {
     await userService.updateUser(userId, { isMuted: true });
     const userSocket = onlineUsers.getUser(userId);
-    userSocket.data.restrictions.isMuted = true;
     if (userSocket) {
+      userSocket.data.restrictions.isMuted = true;
       userSocket.emit("c:userRestrictions", userSocket.data.restrictions);
       userSocket.emit("c:message", {
         text: "You are muted!",
@@ -19,8 +19,8 @@ module.exports = (io, socket) => {
   socket.on("s:unmuteUser", async userId => {
     await userService.updateUser(userId, { isMuted: false });
     const userSocket = onlineUsers.getUser(userId);
-    userSocket.data.restrictions.isMuted = false;
     if (userSocket) {
+      userSocket.data.restrictions.isMuted = false;
       userSocket.emit("c:userRestrictions", userSocket.data.restrictions);
       userSocket.emit("c:message", {
         text: "You are unmuted!",

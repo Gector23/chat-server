@@ -15,7 +15,8 @@ const adminHandlers = require("./hendlers/admin");
 mongoose.connect(process.env.DB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  useCreateIndex: true
+  useCreateIndex: true,
+  useFindAndModify: false
 })
   .then(() => {
     console.log("Connected to database");
