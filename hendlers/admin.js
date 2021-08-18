@@ -36,7 +36,6 @@ module.exports = (io, socket) => {
     if (userSocket) {
       userSocket.disconnect();
       onlineUsersService.removeUser(userId);
-      io.emit("c:onlineUsers", onlineUsersService.getOnlineUsers());
     }
     io.in("admin").emit("c:allUsers", await userService.getAllUsers());
   });

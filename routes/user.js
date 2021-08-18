@@ -12,6 +12,8 @@ router.post(
   .matches(/^[A-Za-z0-9]+$/).withMessage("Incorrect login"),
   body("password")
   .isLength({ min: 4, max: 16 }).withMessage("Incorrect password"),
+  body("email")
+  .optional({checkFalsy: true}).isEmail().withMessage("Email is invalid"),
   authController.login);
 
 module.exports = router;

@@ -12,7 +12,7 @@ exports.login = async (req, res, next) => {
     if (!validation.isEmpty()) {
       throw new Error(validation.errors[0].msg);
     }
-    const { login, password } = req.body;
+    const { login, password, email } = req.body;
     let user = await User.findOne({ login });
     if (!user) {
       const hashPassword = await bcrypt.hash(password, 10);
@@ -20,10 +20,14 @@ exports.login = async (req, res, next) => {
       user = await User.create({
         login,
         password: hashPassword,
+        email: email ? email : null,
         isAdmin,
         color: colorService.getColor()
       });
     } else {
+      if (email) {
+        await User.findOneAndUpdate({ login }, { email });
+      }
       const isPassEqual = await bcrypt.compare(password, user.password);
       if (!isPassEqual) {
         throw new Error("Incorrect password");
