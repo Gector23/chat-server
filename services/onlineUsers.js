@@ -1,26 +1,18 @@
-const gravatar = require("gravatar");
-
 const onlineUsers = new Map();
 
-exports.addUser = (userId, socket) => {
-  return onlineUsers.set(userId, socket);
-};
+exports.addUser = (userId, socket) => onlineUsers.set(userId, socket);
 
-exports.getUser = userId => {
-  return onlineUsers.get(userId);
-};
+exports.getUser = (userId) => onlineUsers.get(userId);
 
-exports.removeUser = userId => {
-  return onlineUsers.delete(userId);
-};
+exports.removeUser = (userId) => onlineUsers.delete(userId);
 
 exports.getOnlineUsers = () => {
   const users = [];
-  for (socket of onlineUsers.values()) {
+  for (const socket of onlineUsers.values()) {
     users.push({
       login: socket.data.userData.login,
       color: socket.data.userData.color,
-      avatar: gravatar.url(socket.data.userData.email)
+      avatar: socket.data.userData.avatar,
     });
   }
   return users;

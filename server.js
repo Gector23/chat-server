@@ -1,40 +1,41 @@
-require("dotenv").config();
-const http = require("http");
-const mongoose = require("mongoose");
-const { Server } = require("socket.io");
+require('dotenv').config();
+const http = require('http');
+const mongoose = require('mongoose');
+const { Server } = require('socket.io');
 
-const app = require("./app");
+const app = require('./app');
 
-const userService = require("./services/user");
-const onlineUsersService = require("./services/onlineUsers");
-const tokenService = require("./services/token");
+const userService = require('./services/user');
+const onlineUsersService = require('./services/onlineUsers');
+const tokenService = require('./services/token');
 
-const messageHandlers = require("./hendlers/message");
-const adminHandlers = require("./hendlers/admin");
+const messageHandlers = require('./hendlers/message');
+const adminHandlers = require('./hendlers/admin');
 
-mongoose.connect(process.env.DB_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-  useFindAndModify: false
-})
+mongoose
+  .connect(process.env.DB_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+  })
   .then(() => {
-    console.log("Connected to database");
+    console.log('Connected to database');
   })
   .catch(() => {
-    console.log("Connection to database failed");
+    console.log('Connection to database failed');
   });
 
 const PORT = process.env.PORT || 5000;
-app.set("port", PORT);
+app.set('port', PORT);
 
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  transports: ["websocket"],
+  transports: ['websocket'],
   cors: {
-    origin: "*"
-  }
+    origin: '*',
+  },
 });
 
 io.use((socket, next) => {
@@ -57,7 +58,7 @@ io.use(async (socket, next) => {
   next();
 });
 
-io.on("connection", async socket => {
+io.on('connection', async (socket) => {
   messageHandlers(io, socket);
   if (socket.data.userData.restrictions.isAdmin) {
     adminHandlers(io, socket);
@@ -69,36 +70,36 @@ io.on("connection", async socket => {
   }
 
   onlineUsersService.addUser(socket.data.tokenPayload._id, socket);
-  socket.emit("c:userRestrictions", socket.data.userData.restrictions);
+  socket.emit('c:userRestrictions', socket.data.userData.restrictions);
   if (socket.data.userData.restrictions.isAdmin) {
-    socket.join("admin");
+    socket.join('admin');
   }
-  socket.broadcast.emit("c:message", {
+  socket.broadcast.emit('c:message', {
     text: `${socket.data.userData.login} join to chat`,
-    type: "info"
+    type: 'info',
   });
-  io.emit("c:onlineUsers", onlineUsersService.getOnlineUsers());
-  io.in("admin").emit("c:allUsers", await userService.getAllUsers());
+  io.emit('c:onlineUsers', onlineUsersService.getOnlineUsers());
+  io.in('admin').emit('c:allUsers', await userService.getAllUsers());
 
   console.log(`${socket.data.userData.login} connected`);
 
-  socket.on("disconnect", async () => {
+  socket.on('disconnect', async () => {
     onlineUsersService.removeUser(socket.data.tokenPayload._id);
     if (socket.data.userData.restrictions.isAdmin) {
-      socket.leave("admin");
+      socket.leave('admin');
     }
     socket.disconnect();
-    socket.broadcast.emit("c:message", {
+    socket.broadcast.emit('c:message', {
       text: `${socket.data.userData.login} left the chat`,
-      type: "info"
+      type: 'info',
     });
-    io.emit("c:onlineUsers", onlineUsersService.getOnlineUsers());
+    io.emit('c:onlineUsers', onlineUsersService.getOnlineUsers());
 
     console.log(`${socket.data.userData.login} disconnected`);
   });
 });
 
-server.on("error", err => {
+server.on('error', (err) => {
   console.log(err);
 });
 

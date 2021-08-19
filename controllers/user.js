@@ -1,10 +1,10 @@
-const bcrypt = require("bcrypt");
-const { validationResult } = require("express-validator");
+const bcrypt = require('bcrypt');
+const { validationResult } = require('express-validator');
 
-const User = require("../models/user.js");
+const User = require('../models/user');
 
-const tokenService = require("../services/token");
-const colorService = require("../services/color");
+const tokenService = require('../services/token');
+const colorService = require('../services/color');
 
 exports.login = async (req, res, next) => {
   try {
@@ -20,9 +20,9 @@ exports.login = async (req, res, next) => {
       user = await User.create({
         login,
         password: hashPassword,
-        email: email ? email : null,
+        email,
         isAdmin,
-        color: colorService.getColor()
+        color: colorService.getColor(),
       });
     } else {
       if (email) {
@@ -30,19 +30,18 @@ exports.login = async (req, res, next) => {
       }
       const isPassEqual = await bcrypt.compare(password, user.password);
       if (!isPassEqual) {
-        throw new Error("Incorrect password");
+        throw new Error('Incorrect password');
       }
     }
     const token = tokenService.generateToken({
-      _id: user._id
+      _id: user._id,
     });
     return res.status(200).json({
-      message: "Successful login",
-      token
+      message: 'Successful login',
+      token,
     });
   } catch (err) {
     next(err);
   }
+  return null;
 };
-
-exports.getUser
