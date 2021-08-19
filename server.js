@@ -2,6 +2,7 @@ require('dotenv').config();
 const http = require('http');
 const mongoose = require('mongoose');
 const { Server } = require('socket.io');
+const Fixtures = require('node-mongodb-fixtures');
 
 const app = require('./app');
 
@@ -11,6 +12,18 @@ const tokenService = require('./services/token');
 
 const messageHandlers = require('./hendlers/message');
 const adminHandlers = require('./hendlers/admin');
+
+const fixtures = new Fixtures({
+  dir: 'fixtures',
+  filter: '.*',
+});
+
+fixtures
+  .connect(process.env.DB_URL, { useUnifiedTopology: true })
+  .then(() => fixtures.unload())
+  .then(() => fixtures.load())
+  .catch((err) => console.error(err))
+  .finally(() => fixtures.disconnect());
 
 mongoose
   .connect(process.env.DB_URL, {
