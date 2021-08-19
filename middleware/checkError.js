@@ -1,4 +1,6 @@
 module.exports = (err, req, res, next) => {
+  console.log(err);
+
   switch (err.message) {
     case 'Incorrect login':
       res.status(400).json({
@@ -17,6 +19,11 @@ module.exports = (err, req, res, next) => {
       break;
     case 'Email already exists':
       res.status(400).json({
+        message: err.message,
+      });
+      break;
+    case 'You are blocked':
+      res.status(403).json({
         message: err.message,
       });
       break;

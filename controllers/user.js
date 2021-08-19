@@ -25,8 +25,12 @@ exports.login = async (req, res, next) => {
         color: colorService.getColor(),
       });
     } else {
+      if (user.isBlocked) {
+        throw new Error('You are blocked');
+      }
       if (email) {
-        await User.findOneAndUpdate({ login }, { email });
+        user.email = email;
+        await user.save();
       }
       const isPassEqual = await bcrypt.compare(password, user.password);
       if (!isPassEqual) {
