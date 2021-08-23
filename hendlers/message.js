@@ -20,13 +20,13 @@ module.exports = (io, socket) => {
 
     const messageDate = Date.now();
 
-    if (messageDate < +socket.data.userData.lastMessageDate + 1000 * 15) {
-      socket.emit('c:message', {
-        text: 'Interval between messages 15s',
-        type: 'info',
-      });
-      return;
-    }
+    // if (messageDate < +socket.data.userData.lastMessageDate + 1000 * 15) {
+    //   socket.emit('c:message', {
+    //     text: 'Interval between messages 15s',
+    //     type: 'info',
+    //   });
+    //   return;
+    // }
 
     userService.updateUser(socket.data.tokenPayload._id, { lastMessageDate: messageDate });
     socket.data.userData.lastMessageDate = messageDate;

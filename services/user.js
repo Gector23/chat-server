@@ -2,17 +2,32 @@ const gravatar = require('gravatar');
 
 const User = require('../models/user');
 
-exports.getUserData = async (_id) => {
-  const user = await User.findById(
-    _id,
-    'login email isAdmin isMuted isBlocked lastMessageDate color',
-  );
+const colorService = require('./color');
+
+exports.createUser = (login, password, email) => (
+  User.create({
+    login,
+    password,
+    email,
+    color: colorService.getColor(),
+  })
+);
+
+exports.findUser = (email) => (
+  User.findOne({
+    where: {
+      email,
+    },
+  })
+);
+
+exports.getUserData = async (id) => {
+  const user = await User.findByPk(id);
 
   return {
     login: user.login,
     email: user.email,
     avatar: gravatar.url(user.email),
-    lastMessageDate: user.lastMessageDate,
     color: user.color,
     restrictions: {
       isAdmin: user.isAdmin,
@@ -23,12 +38,11 @@ exports.getUserData = async (_id) => {
 };
 
 exports.getAllUsers = async () => {
-  const users = await User.find({}, 'login email isAdmin isMuted isBlocked lastMessageDate color');
+  const users = await User.findAll();
 
   return users.map((user) => ({
-    _id: user._id,
+    id: user.id,
     login: user.login,
-    lastMessageDate: user.lastMessageDate,
     color: user.color,
     isAdmin: user.isAdmin,
     isMuted: user.isMuted,
@@ -38,4 +52,8 @@ exports.getAllUsers = async () => {
   }));
 };
 
-exports.updateUser = async (_id, update) => User.findByIdAndUpdate(_id, update);
+exports.updateUser = async (id, update) => User.update(update, {
+  where: {
+    id,
+  },
+});

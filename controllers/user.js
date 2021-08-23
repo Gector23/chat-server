@@ -1,10 +1,8 @@
 const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
 
-const User = require('../models/user');
-
 const tokenService = require('../services/token');
-const colorService = require('../services/color');
+const userService = require('../services/user');
 
 exports.login = async (req, res, next) => {
   try {
@@ -15,25 +13,17 @@ exports.login = async (req, res, next) => {
     }
 
     const { login, password, email } = req.body;
-    let user = await User.findOne({ login });
+    let user = await userService.findUser(email);
+
+    console.log(user.id);
 
     if (!user) {
       const hashPassword = await bcrypt.hash(password, 10);
 
-      user = await User.create({
-        login,
-        password: hashPassword,
-        email,
-        color: colorService.getColor(),
-      });
+      user = await userService.createUser(login, hashPassword, email);
     } else {
       if (user.isBlocked) {
         throw new Error('You are blocked');
-      }
-
-      if (email) {
-        user.email = email;
-        await user.save();
       }
 
       const isPassEqual = await bcrypt.compare(password, user.password);
@@ -44,7 +34,7 @@ exports.login = async (req, res, next) => {
     }
 
     const token = tokenService.generateToken({
-      _id: user._id,
+      id: user.id,
     });
 
     return res.status(200).json({

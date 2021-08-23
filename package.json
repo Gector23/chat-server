@@ -13,14 +13,16 @@
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^4.1.0",
     "mongoose": "^5.13.6",
-    "node-mongodb-fixtures": "^3.2.9",
+    "mysql2": "^2.3.0",
+    "sequelize": "^6.6.5",
     "socket.io": "^4.1.3"
   },
   "devDependencies": {
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.24.0",
-    "nodemon": "^2.0.12"
+    "nodemon": "^2.0.12",
+    "sequelize-cli": "^6.2.0"
   },
   "scripts": {
     "dev": "nodemon server.js"

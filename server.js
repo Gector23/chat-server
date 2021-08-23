@@ -1,10 +1,10 @@
 require('dotenv').config();
 const http = require('http');
-const mongoose = require('mongoose');
 const { Server } = require('socket.io');
-const Fixtures = require('node-mongodb-fixtures');
 
 const app = require('./app');
+
+const sequelize = require('./db');
 
 const userService = require('./services/user');
 const onlineUsersService = require('./services/onlineUsers');
@@ -13,31 +13,9 @@ const tokenService = require('./services/token');
 const messageHandlers = require('./hendlers/message');
 const adminHandlers = require('./hendlers/admin');
 
-const fixtures = new Fixtures({
-  dir: 'fixtures',
-  filter: '.*',
+sequelize.sync().catch((err) => {
+  console.log(err);
 });
-
-fixtures
-  .connect(process.env.DB_URL, { useUnifiedTopology: true })
-  .then(() => fixtures.unload())
-  .then(() => fixtures.load())
-  .catch((err) => console.error(err))
-  .finally(() => fixtures.disconnect());
-
-mongoose
-  .connect(process.env.DB_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-  })
-  .then(() => {
-    console.log('Connected to database');
-  })
-  .catch(() => {
-    console.log('Connection to database failed');
-  });
 
 const PORT = process.env.PORT || 5000;
 app.set('port', PORT);

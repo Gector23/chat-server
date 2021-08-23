@@ -10,6 +10,7 @@
 .env.production.local
 
 .eslintrc
+/config
 
 npm-debug.log*
 yarn-debug.log*
