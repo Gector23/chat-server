@@ -51,46 +51,51 @@ const io = new Server(server, {
   },
 });
 
-io.use((socket, next) => {
+io.use(async (socket, next) => {
   const tokenPayload = tokenService.verifyToken(socket.handshake.auth.token);
+
   if (!tokenPayload) {
     socket.disconnect();
     return;
   }
-  socket.data.tokenPayload = tokenPayload;
-  next();
-});
 
-io.use(async (socket, next) => {
-  const userData = await userService.getUserData(socket.data.tokenPayload._id);
-  if (userData.restrictions.isBlocked) {
+  const userData = await userService.getUserData(tokenPayload._id);
+
+  if (userData?.restrictions?.isBlocked) {
     socket.disconnect();
     return;
   }
+
+  socket.data.tokenPayload = tokenPayload;
   socket.data.userData = userData;
   next();
 });
 
 io.on('connection', async (socket) => {
   messageHandlers(io, socket);
+
   if (socket.data.userData.restrictions.isAdmin) {
     adminHandlers(io, socket);
   }
 
   const prevSocket = onlineUsersService.getUser(socket.data.tokenPayload._id);
+
   if (prevSocket) {
     prevSocket.disconnect();
   }
 
   onlineUsersService.addUser(socket.data.tokenPayload._id, socket);
   socket.emit('c:userRestrictions', socket.data.userData.restrictions);
+
   if (socket.data.userData.restrictions.isAdmin) {
     socket.join('admin');
   }
+
   socket.broadcast.emit('c:message', {
     text: `${socket.data.userData.login} join to chat`,
     type: 'info',
   });
+
   io.emit('c:onlineUsers', onlineUsersService.getOnlineUsers());
   io.in('admin').emit('c:allUsers', await userService.getAllUsers());
 
@@ -98,14 +103,17 @@ io.on('connection', async (socket) => {
 
   socket.on('disconnect', async () => {
     onlineUsersService.removeUser(socket.data.tokenPayload._id);
+
     if (socket.data.userData.restrictions.isAdmin) {
       socket.leave('admin');
     }
+
     socket.disconnect();
     socket.broadcast.emit('c:message', {
       text: `${socket.data.userData.login} left the chat`,
       type: 'info',
     });
+
     io.emit('c:onlineUsers', onlineUsersService.getOnlineUsers());
 
     console.log(`${socket.data.userData.login} disconnected`);

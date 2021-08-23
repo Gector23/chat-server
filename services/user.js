@@ -7,6 +7,7 @@ exports.getUserData = async (_id) => {
     _id,
     'login email isAdmin isMuted isBlocked lastMessageDate color',
   );
+
   return {
     login: user.login,
     email: user.email,
@@ -23,6 +24,7 @@ exports.getUserData = async (_id) => {
 
 exports.getAllUsers = async () => {
   const users = await User.find({}, 'login email isAdmin isMuted isBlocked lastMessageDate color');
+
   return users.map((user) => ({
     _id: user._id,
     login: user.login,

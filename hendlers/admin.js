@@ -4,7 +4,9 @@ const onlineUsersService = require('../services/onlineUsers');
 module.exports = (io, socket) => {
   socket.on('s:muteUser', async (userId) => {
     await userService.updateUser(userId, { isMuted: true });
+
     const userSocket = onlineUsersService.getUser(userId);
+
     if (userSocket) {
       userSocket.data.userData.restrictions.isMuted = true;
       userSocket.emit('c:userRestrictions', userSocket.data.userData.restrictions);
@@ -13,6 +15,7 @@ module.exports = (io, socket) => {
         type: 'info',
       });
     }
+
     io.in('admin').emit('c:allUsers', await userService.getAllUsers());
   });
 
